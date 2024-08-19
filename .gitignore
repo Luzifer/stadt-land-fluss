@@ -1,0 +1,4 @@
+dist/app.*
+dist/*.ttf
+dist/*.woff2
+node_modules
