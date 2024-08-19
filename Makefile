@@ -14,3 +14,11 @@ frontend_lint: node_modules
 
 node_modules:
 	npm ci --include dev
+
+trivy:
+	trivy fs . \
+		--dependency-tree \
+		--format table \
+		--quiet \
+		--scanners misconfig,license,secret,vuln \
+		--severity HIGH,CRITICAL

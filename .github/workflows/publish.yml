@@ -4,7 +4,34 @@ name: CI Workflow
 on: push
 
 jobs:
+  test:
+    defaults:
+      run:
+        shell: bash
+
+    container:
+      image: luzifer/gh-arch-env
+
+    permissions:
+      contents: read
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Marking workdir safe
+        run: git config --global --add safe.directory /__w/stadt-land-fluss/stadt-land-fluss
+
+      - name: Lint code
+        run: make frontend_lint trivy
+
   gh-page-publish:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: [test]
+
     defaults:
       run:
         shell: bash
