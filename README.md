@@ -6,6 +6,8 @@ This project emerged from a rehab task to improve the ability to remember words:
 
 ## How to play
 
+This game is intended to be played while being in a voice-chat (see the description of the reason behind creating this):
+
 You can just go to the [Github page for this repo](https://luzifer.github.io/stadt-land-fluss/) and you get a game opened (at the moment with German interface and categories, see below). Just share the URL in your browsers location bar with all other participants and they will enter the same game.
 
 - Edit your name in the top of the page (will be stored in local storage)
