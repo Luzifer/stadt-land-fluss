@@ -1,0 +1,41 @@
+---
+
+name: CI Workflow
+on: push
+
+jobs:
+  gh-page-publish:
+    defaults:
+      run:
+        shell: bash
+
+    container:
+      image: luzifer/gh-arch-env
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Marking workdir safe
+        run: git config --global --add safe.directory /__w/stadt-land-fluss/stadt-land-fluss
+
+      - name: Generate static page
+        run: make frontend_prod
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: dist
+
+      - name: Deploy artifact
+        uses: actions/deploy-pages@v1
+
+...
