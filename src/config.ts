@@ -34,7 +34,7 @@ const categories: string[] = [
 
 const gameSocketTemplate: string = 'wss://tools.hub.luzifer.io/ws/slf-{gameId}'
 
-const instanceTimeout: number = 30000 // ms
+const instanceTimeout: number = 120000 // ms
 
 export {
   categories,
