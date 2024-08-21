@@ -133,7 +133,7 @@
 </template>
 
 <script lang="ts">
-import { categories, gameSocketTemplate } from './config'
+import { categories, gameSocketTemplate, instanceTimeout } from './config'
 import { defineComponent } from 'vue'
 
 const baseBackoff = 100 // ms
@@ -141,6 +141,11 @@ const maxBackoff = 10000 // ms
 
 export default defineComponent({
   computed: {
+    activeInstances(): any {
+      return Object.fromEntries(Object.entries(this.knownInstances)
+        .filter((e: any[]) => this.now.getTime() - e[1].lastActive < instanceTimeout))
+    },
+
     answersGiven(): Object {
       const keys: string[] = []
       for (const cat of this.gameState.categories) {
@@ -150,9 +155,9 @@ export default defineComponent({
       }
 
       return Object.fromEntries(keys.map(key => [
-        key, Object.keys(this.knownInstances).map(instId => ({
-          answer: this.knownInstances[instId].answers[key],
-          name: this.knownInstances[instId].name,
+        key, Object.keys(this.activeInstances).map(instId => ({
+          answer: this.activeInstances[instId].answers[key],
+          name: this.activeInstances[instId].name,
         })),
       ]))
     },
@@ -169,6 +174,7 @@ export default defineComponent({
 
     this.knownInstances[this.instance] = {
       answers: {},
+      lastActive: new Date().getTime(),
       name: this.name,
     }
   },
@@ -189,6 +195,7 @@ export default defineComponent({
       knownInstances: {} as any,
       localAnswers: {} as any,
       name: '',
+      now: new Date(),
     }
   },
 
@@ -312,7 +319,10 @@ export default defineComponent({
     },
 
     sendPing(): void {
-      this.sendMessage({ instanceState: this.knownInstances[this.instance], type: 'ping' })
+      this.sendMessage({ instanceState: {
+        ...this.knownInstances[this.instance],
+        lastActive: new Date().getTime(),
+      }, type: 'ping' })
     },
 
     shuffle(list: Array<any>): Array<any> {
@@ -364,6 +374,9 @@ export default defineComponent({
     this.connectToGame()
 
     window.setInterval(() => this.sendPing(), 10000)
+    window.setInterval(() => {
+      this.now = new Date()
+    }, 1000)
   },
 
   name: 'StadtLandFlussApp',
