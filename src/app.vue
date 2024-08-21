@@ -1,8 +1,25 @@
 <template>
   <div class="container my-3">
     <div class="row mb-4">
-      <div class="col text-center">
+      <div class="col text-center position-relative">
         <h1>Stadt-Land-Fluss</h1>
+
+        <span class="position-absolute top-0 end-0">
+          <span
+            v-if="!gameSocketConnected"
+            class="badge text-danger"
+            title="Spiel ist vom Server getrennt"
+          >
+            <i class="fas fa-cloud fa-fw" />
+          </span>
+          <span
+            class="badge ms-1"
+            title="Anzahl aktiver Spieler"
+          >
+            <i class="fas fa-user fa-fw me-1" />
+            {{ numberActivePlayers }}
+          </span>
+        </span>
       </div>
     </div>
 
@@ -200,6 +217,10 @@ export default defineComponent({
           },
         ]))
     },
+
+    numberActivePlayers(): number {
+      return Object.keys(this.activeInstances).length
+    },
   },
 
   created(): void {
@@ -223,6 +244,7 @@ export default defineComponent({
       backoffCurrent: baseBackoff,
       gameId: '',
       gameSocket: null as WebSocket | null,
+      gameSocketConnected: false,
       gameState: {
         categories: [],
         gameId: '',
@@ -271,11 +293,13 @@ export default defineComponent({
       this.gameSocket = new WebSocket(gameSocketTemplate.replace('{gameId}', this.gameId))
 
       this.gameSocket.addEventListener('close', () => {
+        this.gameSocketConnected = false
         this.backoffCurrent = Math.min(maxBackoff, this.backoffCurrent * 1.5)
         window.setTimeout(() => this.connectToGame(), this.backoffCurrent)
       })
 
       this.gameSocket.addEventListener('open', () => {
+        this.gameSocketConnected = true
         this.sendMessage({ type: 'ohai' })
       })
 
