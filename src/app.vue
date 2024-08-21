@@ -19,7 +19,7 @@
             @keypress.enter="broadcastName"
           >
           <button
-            class="btn btn-success"
+            class="btn btn-secondary"
             @click="broadcastName"
           >
             <i class="fas fa-pencil fa-fw me-1" />
@@ -93,6 +93,20 @@
                       <i class="fas fa-play fa-fw" />
                     </button>
                   </div>
+                  <div class="text-center text-muted small mt-1 text-nowrap">
+                    <span class="badge bg-success me-2">
+                      <i class="fas fa-check fa-fw me-1" />
+                      {{ foreignInstanceAnswerStatus[generateKey(cat, letter)].answered }}
+                    </span>
+                    <span class="badge bg-warning text-dark me-2">
+                      <i class="fas fa-forward fa-fw me-1" />
+                      {{ foreignInstanceAnswerStatus[generateKey(cat, letter)].skipped }}
+                    </span>
+                    <span class="badge bg-secondary">
+                      <i class="fas fa-question fa-fw me-1" />
+                      {{ foreignInstanceAnswerStatus[generateKey(cat, letter)].thinking }}
+                    </span>
+                  </div>
                 </template>
                 <template v-else>
                   <div
@@ -146,7 +160,7 @@ export default defineComponent({
         .filter((e: any[]) => this.now.getTime() - e[1].lastActive < instanceTimeout))
     },
 
-    answersGiven(): Object {
+    answerKeys(): string[] {
       const keys: string[] = []
       for (const cat of this.gameState.categories) {
         for (const letter of this.gameState.letters) {
@@ -154,12 +168,37 @@ export default defineComponent({
         }
       }
 
-      return Object.fromEntries(keys.map(key => [
+      return keys
+    },
+
+    answersGiven(): Object {
+      return Object.fromEntries(this.answerKeys.map(key => [
         key, Object.keys(this.activeInstances).map(instId => ({
           answer: this.activeInstances[instId].answers[key],
           name: this.activeInstances[instId].name,
         })),
       ]))
+    },
+
+    foreignInstanceAnswerStatus(): any {
+      const foreignInstances = Object.entries(this.activeInstances)
+        .filter(e => e[0] !== this.instance)
+        .map(e => e[1])
+
+      return Object.fromEntries(this.answerKeys
+        .map((key: string) => [
+          key, {
+            answered: foreignInstances
+              .filter((instance: any) => instance.answers[key])
+              .length,
+            skipped: foreignInstances
+              .filter((instance: any) => instance.answers[key] === '')
+              .length,
+            thinking: foreignInstances
+              .filter((instance: any) => instance.answers[key] === undefined)
+              .length,
+          },
+        ]))
     },
   },
 
