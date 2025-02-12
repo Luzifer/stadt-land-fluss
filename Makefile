@@ -8,7 +8,6 @@ frontend: node_modules
 
 frontend_lint: node_modules
 	./node_modules/.bin/eslint \
-		--ext .ts,.vue \
 		--fix \
 		src
 
